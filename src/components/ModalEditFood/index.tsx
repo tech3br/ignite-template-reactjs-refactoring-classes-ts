@@ -34,13 +34,12 @@ export default function ModalEditFood({
   editingFood,
   handleUpdateFood,
 }: ModalEditFoodProps) {
+  const formRef = createRef<FormHandles>();
+
   const handleSubmit = async (data: Food) => {
-    console.log(data);
     handleUpdateFood(data);
     setIsOpen();
   };
-
-  const formRef = createRef<FormHandles>();
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>

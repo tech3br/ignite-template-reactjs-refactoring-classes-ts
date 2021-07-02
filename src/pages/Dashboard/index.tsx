@@ -16,9 +16,18 @@ interface Food {
 
 function Dashboard() {
   const [foods, setFoods] = useState<Food[]>([]);
-  const [editingFood, setEditingFood] = useState({});
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingFood, setEditingFood] = useState<Food>();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchFoods = async () => {
+      const response = await api.get<Food[]>("/foods");
+      setFoods(response.data);
+    };
+
+    fetchFoods();
+  }, []);
 
   const handleAddFood = async (food: Food) => {
     try {
@@ -35,7 +44,10 @@ function Dashboard() {
 
   const handleUpdateFood = async (food: Food) => {
     try {
-      const foodUpdated = await api.put(`/foods/${food.id}`, {
+      if (!editingFood) {
+        return;
+      }
+      const foodUpdated = await api.put<Food>(`/foods/${editingFood.id}`, {
         ...editingFood,
         ...food,
       });
@@ -58,11 +70,11 @@ function Dashboard() {
     setFoods(foodsFiltered);
   };
 
-  const toggleModal = () => {
+  const toggleModal = (): void => {
     setModalOpen(!modalOpen);
   };
 
-  const toggleEditModal = () => {
+  const toggleEditModal = (): void => {
     setEditModalOpen(!editModalOpen);
   };
 
@@ -70,19 +82,6 @@ function Dashboard() {
     setEditingFood(food);
     setEditModalOpen(true);
   };
-
-  const fetchFoods = useCallback(async () => {
-    const response = await api.get("/foods");
-    setFoods(response.data);
-  }, []);
-  // if userId changes, useEffect will run again
-  // if you want to run only once, just leave array empty []
-
-  useEffect(() => {
-    fetchFoods();
-  }, []);
-
-  console.log(modalOpen);
 
   return (
     <>
@@ -95,7 +94,7 @@ function Dashboard() {
       <ModalEditFood
         isOpen={editModalOpen}
         setIsOpen={toggleEditModal}
-        editingFood={editingFood}
+        editingFood={editingFood as Food}
         handleUpdateFood={handleUpdateFood}
       />
 
